@@ -65,6 +65,7 @@ pub use schema::to_parquet_type;
 pub use sink::FileSink;
 
 pub use pages::array_to_columns;
+pub use pages::to_leafs;
 pub use pages::Nested;
 
 pub(self) fn decimal_length_from_precision(precision: usize) -> usize {

@@ -146,7 +146,7 @@ fn to_nested_recursive<'a>(
     Ok(())
 }
 
-fn to_leafs(array: &dyn Array) -> Vec<&dyn Array> {
+pub fn to_leafs(array: &dyn Array) -> Vec<&dyn Array> {
     let mut leafs = vec![];
     to_leafs_recursive(array, &mut leafs);
     leafs
