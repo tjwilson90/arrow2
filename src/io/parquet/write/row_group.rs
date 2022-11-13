@@ -1,6 +1,6 @@
 use parquet2::error::Error as ParquetError;
 use parquet2::schema::types::ParquetType;
-use parquet2::write::Compressor;
+use parquet2::write::{Compressor, ParquetColumn};
 use parquet2::FallibleStreamingIterator;
 
 use crate::{
@@ -50,7 +50,10 @@ pub fn row_group_iter<A: AsRef<dyn Array> + 'static + Send + Sync>(
 
                         let compressed_pages = Compressor::new(pages, options.compression, vec![])
                             .map_err(Error::from);
-                        Ok(DynStreamingIterator::new(compressed_pages))
+                        Ok(ParquetColumn {
+                            compressed_pages: DynStreamingIterator::new(compressed_pages),
+                            bloom_filter: Vec::new(),
+                        })
                     })
                     .collect::<Vec<_>>()
             }),

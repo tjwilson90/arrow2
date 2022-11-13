@@ -67,6 +67,7 @@ pub use schema::to_parquet_type;
 pub use sink::FileSink;
 
 pub use pages::array_to_columns;
+pub use pages::to_leafs;
 pub use pages::Nested;
 
 /// returns offset and length to slice the leaf values

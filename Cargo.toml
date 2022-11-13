@@ -107,7 +107,8 @@ ahash = { version = "0.8", features=["runtime-rng"] }
 
 # parquet support
 [dependencies.parquet2]
-version = "0.17"
+git = "https://github.com/tjwilson90/parquet2"
+branch = "v0.17"
 optional = true
 default_features = false
 features = ["async"]
