@@ -33,6 +33,7 @@ mod primitive;
 mod structure;
 mod utf8;
 
+use crate::array::ConstUtf8Array;
 pub(crate) use boolean::take as take_boolean;
 
 /// Returns a new [`Array`] with only indices at `indices`. Null indices are taken as nulls.
@@ -63,6 +64,13 @@ pub fn take<O: Index>(values: &dyn Array, indices: &PrimitiveArray<O>) -> Result
         LargeUtf8 => {
             let values = values.as_any().downcast_ref().unwrap();
             Ok(Box::new(utf8::take::<i64, _>(values, indices)))
+        }
+        ConstUtf8 => {
+            let values = values.as_any().downcast_ref::<ConstUtf8Array>().unwrap();
+            Ok(Box::new(ConstUtf8Array::new(
+                values.value().to_string(),
+                indices.len(),
+            )))
         }
         Binary => {
             let values = values.as_any().downcast_ref().unwrap();
@@ -130,6 +138,7 @@ pub fn can_take(data_type: &DataType) -> bool {
             | DataType::Decimal(_, _)
             | DataType::Utf8
             | DataType::LargeUtf8
+            | DataType::ConstUtf8
             | DataType::Binary
             | DataType::LargeBinary
             | DataType::Struct(_)

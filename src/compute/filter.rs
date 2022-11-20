@@ -224,6 +224,10 @@ pub fn build_filter(filter: &BooleanArray) -> Result<Filter> {
                 let array: Utf8Array<i64> = growable.into();
                 Box::new(array)
             }
+            ConstUtf8 => {
+                let array = array.as_any().downcast_ref::<ConstUtf8Array>().unwrap();
+                Box::new(ConstUtf8Array::new(array.value().to_string(), filter_count))
+            }
             _ => {
                 let mut mutable = make_growable(&[array], false, filter_count);
                 chunks
@@ -280,6 +284,13 @@ pub fn filter(array: &dyn Array, filter: &BooleanArray) -> Result<Box<dyn Array>
             let array = array.as_any().downcast_ref().unwrap();
             Ok(Box::new(filter_primitive::<$T>(array, filter)))
         }),
+        ConstUtf8 => {
+            let array = array.as_any().downcast_ref::<ConstUtf8Array>().unwrap();
+            Ok(Box::new(ConstUtf8Array::new(
+                array.value().to_string(),
+                filter.len() - false_count,
+            )))
+        }
         _ => {
             let iter = SlicesIterator::new(filter.values());
             let mut mutable = make_growable(&[array], false, iter.slots());

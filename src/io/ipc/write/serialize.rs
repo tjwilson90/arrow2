@@ -496,6 +496,7 @@ pub fn write(
             is_little_endian,
             compression,
         ),
+        ConstUtf8 => unimplemented!(),
         List => write_list::<i32>(
             array.as_any().downcast_ref().unwrap(),
             buffers,

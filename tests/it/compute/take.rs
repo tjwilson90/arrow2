@@ -133,6 +133,7 @@ fn consistency() {
         Date64,
         Utf8,
         LargeUtf8,
+        ConstUtf8,
         Binary,
         LargeBinary,
         Duration(TimeUnit::Second),

@@ -58,6 +58,9 @@ pub fn get_value_display<'a, F: Write + 'a>(
                 f,
             )
         }),
+        ConstUtf8 => Box::new(|f, _index| {
+            super::const_utf8::fmt::write_value(array.as_any().downcast_ref().unwrap(), f)
+        }),
         List => Box::new(move |f, index| {
             super::list::fmt::write_value::<i32, _>(
                 array.as_any().downcast_ref().unwrap(),

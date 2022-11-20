@@ -60,6 +60,10 @@ pub fn estimated_bytes_size(array: &dyn Array) -> usize {
         LargeBinary => dyn_binary!(array, BinaryArray<i64>, i64),
         Utf8 => dyn_binary!(array, Utf8Array<i32>, i32),
         LargeUtf8 => dyn_binary!(array, Utf8Array<i64>, i64),
+        ConstUtf8 => {
+            let array = array.as_any().downcast_ref::<ConstUtf8Array>().unwrap();
+            array.value().len() + 8
+        }
         List => {
             let array = array.as_any().downcast_ref::<ListArray<i32>>().unwrap();
             estimated_bytes_size(array.values().as_ref())

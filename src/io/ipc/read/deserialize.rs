@@ -118,6 +118,7 @@ pub fn read<R: Read + Seek>(
             scratch,
         )
         .map(|x| x.boxed()),
+        ConstUtf8 => unimplemented!(),
         List => read_list::<i32, _>(
             field_nodes,
             data_type,
@@ -241,6 +242,7 @@ pub fn skip(
         Primitive(_) => skip_primitive(field_nodes, buffers),
         LargeBinary | Binary => skip_binary(field_nodes, buffers),
         LargeUtf8 | Utf8 => skip_utf8(field_nodes, buffers),
+        ConstUtf8 => unimplemented!(),
         FixedSizeBinary => skip_fixed_size_binary(field_nodes, buffers),
         List => skip_list::<i32>(field_nodes, data_type, buffers),
         LargeList => skip_list::<i64>(field_nodes, data_type, buffers),

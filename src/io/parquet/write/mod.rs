@@ -67,7 +67,7 @@ pub use schema::to_parquet_type;
 pub use sink::FileSink;
 
 pub use pages::array_to_columns;
-pub use pages::to_leafs;
+pub use pages::to_leaves;
 pub use pages::Nested;
 
 /// returns offset and length to slice the leaf values
@@ -625,6 +625,7 @@ fn transverse_recursive<T, F: Fn(&DataType) -> T + Clone>(
     match data_type.to_physical_type() {
         Null | Boolean | Primitive(_) | Binary | FixedSizeBinary | LargeBinary | Utf8
         | Dictionary(_) | LargeUtf8 => encodings.push(map(data_type)),
+        ConstUtf8 => unimplemented!(),
         List | FixedSizeList | LargeList => {
             let a = data_type.to_logical_type();
             if let DataType::List(inner) = a {

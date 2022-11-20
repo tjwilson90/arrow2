@@ -110,6 +110,7 @@ pub fn new_scalar(array: &dyn Array, index: usize) -> Box<dyn Scalar> {
         }),
         Utf8 => dyn_new_utf8!(array, index, i32),
         LargeUtf8 => dyn_new_utf8!(array, index, i64),
+        ConstUtf8 => unimplemented!(),
         Binary => dyn_new_binary!(array, index, i32),
         LargeBinary => dyn_new_binary!(array, index, i64),
         List => dyn_new_list!(array, index, i32),
