@@ -99,6 +99,8 @@ pub enum DataType {
     Utf8,
     /// A variable-length UTF-8 encoded string whose offsets are represented as [`i64`].
     LargeUtf8,
+    /// A variable-length UTF-8 encoded string.
+    ConstUtf8,
     /// A list of some logical data type whose offsets are represented as [`i32`].
     List(Box<Field>),
     /// A list of some logical data type with a fixed number of elements.
@@ -252,6 +254,7 @@ impl DataType {
             LargeBinary => PhysicalType::LargeBinary,
             Utf8 => PhysicalType::Utf8,
             LargeUtf8 => PhysicalType::LargeUtf8,
+            ConstUtf8 => PhysicalType::ConstUtf8,
             List(_) => PhysicalType::List,
             FixedSizeList(_, _) => PhysicalType::FixedSizeList,
             LargeList(_) => PhysicalType::LargeList,

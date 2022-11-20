@@ -231,6 +231,11 @@ pub fn equal(lhs: &dyn Array, rhs: &dyn Array) -> bool {
             let rhs = rhs.as_any().downcast_ref().unwrap();
             utf8::equal::<i64>(lhs, rhs)
         }
+        ConstUtf8 => {
+            let lhs = lhs.as_any().downcast_ref::<ConstUtf8Array>().unwrap();
+            let rhs = rhs.as_any().downcast_ref::<ConstUtf8Array>().unwrap();
+            lhs.value() == rhs.value() && lhs.len() == rhs.len()
+        }
         Binary => {
             let lhs = lhs.as_any().downcast_ref().unwrap();
             let rhs = rhs.as_any().downcast_ref().unwrap();

@@ -24,6 +24,7 @@ pub fn align_to_c_data_interface(array: Box<dyn Array>) -> Box<dyn Array> {
         FixedSizeBinary => ffi_dyn!(array, FixedSizeBinaryArray),
         Utf8 => ffi_dyn!(array, Utf8Array::<i32>),
         LargeUtf8 => ffi_dyn!(array, Utf8Array::<i64>),
+        ConstUtf8 => unimplemented!(),
         List => ffi_dyn!(array, ListArray::<i32>),
         LargeList => ffi_dyn!(array, ListArray::<i64>),
         FixedSizeList => ffi_dyn!(array, FixedSizeListArray),

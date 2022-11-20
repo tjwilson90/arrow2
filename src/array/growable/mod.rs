@@ -7,6 +7,8 @@ use std::sync::Arc;
 
 mod binary;
 pub use binary::GrowableBinary;
+mod const_utf8;
+pub use const_utf8::GrowableConstUtf8;
 mod union;
 pub use union::GrowableUnion;
 mod boolean;
@@ -86,6 +88,12 @@ pub fn make_growable<'a>(
         }),
         Utf8 => dyn_growable!(utf8::GrowableUtf8::<i32>, arrays, use_validity, capacity),
         LargeUtf8 => dyn_growable!(utf8::GrowableUtf8::<i64>, arrays, use_validity, capacity),
+        ConstUtf8 => dyn_growable!(
+            const_utf8::GrowableConstUtf8,
+            arrays,
+            use_validity,
+            capacity
+        ),
         Binary => dyn_growable!(
             binary::GrowableBinary::<i32>,
             arrays,

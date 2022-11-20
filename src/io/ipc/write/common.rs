@@ -40,6 +40,7 @@ fn encode_dictionary(
     match array.data_type().to_physical_type() {
         Utf8 | LargeUtf8 | Binary | LargeBinary | Primitive(_) | Boolean | Null
         | FixedSizeBinary => Ok(()),
+        ConstUtf8 => unimplemented!(),
         Dictionary(key_type) => match_integer_type!(key_type, |$T| {
             let dict_id = field.dictionary_id
                 .ok_or_else(|| Error::InvalidArgumentError("Dictionaries must have an associated id".to_string()))?;

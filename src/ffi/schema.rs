@@ -412,6 +412,7 @@ fn to_format(data_type: &DataType) -> String {
         DataType::LargeBinary => "Z".to_string(),
         DataType::Utf8 => "u".to_string(),
         DataType::LargeUtf8 => "U".to_string(),
+        DataType::ConstUtf8 => unimplemented!(),
         DataType::Date32 => "tdD".to_string(),
         DataType::Date64 => "tdm".to_string(),
         DataType::Time32(TimeUnit::Second) => "tts".to_string(),
