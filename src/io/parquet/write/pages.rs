@@ -19,6 +19,7 @@ pub struct ListNested<'a, O: Offset> {
     pub is_optional: bool,
     pub offsets: &'a [O],
     pub validity: Option<&'a Bitmap>,
+    pub validity_offset: usize,
 }
 
 impl<'a, O: Offset> ListNested<'a, O> {
@@ -27,6 +28,7 @@ impl<'a, O: Offset> ListNested<'a, O> {
             is_optional,
             offsets,
             validity,
+            validity_offset: 0,
         }
     }
 }
@@ -487,6 +489,7 @@ mod tests {
                         is_optional: false,
                         offsets: &[0, 2, 4],
                         validity: None,
+                        validity_offset: 0,
                     }),
                     Nested::Struct(Some(&Bitmap::from([true, true, false, true])), true, 4),
                     Nested::Primitive(None, false, 4),
@@ -496,6 +499,7 @@ mod tests {
                         is_optional: false,
                         offsets: &[0, 2, 4],
                         validity: None,
+                        validity_offset: 0,
                     }),
                     Nested::Struct(Some(&Bitmap::from([true, true, false, true])), true, 4),
                     Nested::Primitive(None, false, 4),

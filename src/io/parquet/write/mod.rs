@@ -170,11 +170,13 @@ fn slice_parquet_array<'a>(
                 // the slice is a bit awkward because we always want the latest value to compute the next length;
                 l_nested.offsets = &l_nested.offsets
                     [offset..offset + std::cmp::min(length + 1, l_nested.offsets.len())];
+                l_nested.validity_offset = offset;
             }
             Nested::List(l_nested) => {
                 is_nested = true;
                 l_nested.offsets = &l_nested.offsets
                     [offset..offset + std::cmp::min(length + 1, l_nested.offsets.len())];
+                l_nested.validity_offset = offset;
             }
             _ => {}
         }

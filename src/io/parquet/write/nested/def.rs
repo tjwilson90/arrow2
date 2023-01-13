@@ -37,6 +37,7 @@ fn single_list_iter<'a, O: Offset>(nested: &ListNested<'a, O>) -> Box<dyn DebugI
         (true, Some(validity)) => Box::new(
             validity
                 .iter()
+                .skip(nested.validity_offset)
                 // lists have 2 groups, so
                 // True => 2
                 // False => 1
@@ -221,6 +222,7 @@ mod tests {
                 is_optional: false,
                 offsets: &[0, 2, 2, 5, 8, 8, 11, 11, 12],
                 validity: None,
+                validity_offset: 0,
             }),
             Nested::Primitive(None, false, 12),
         ];
@@ -246,6 +248,7 @@ mod tests {
                 is_optional: true,
                 offsets: &[0, 2, 2, 5, 8, 8, 11, 11, 12],
                 validity: Some(&v0),
+                validity_offset: 0,
             }),
             Nested::Primitive(Some(&v1), true, 12),
         ];
@@ -261,11 +264,13 @@ mod tests {
                 is_optional: false,
                 offsets: &[0, 2, 4],
                 validity: None,
+                validity_offset: 0,
             }),
             Nested::List(ListNested::<i32> {
                 is_optional: false,
                 offsets: &[0, 3, 7, 8, 10],
                 validity: None,
+                validity_offset: 0,
             }),
             Nested::Primitive(None, false, 12),
         ];
@@ -283,11 +288,13 @@ mod tests {
                 is_optional: true,
                 offsets: &[0, 2, 2, 2, 5],
                 validity: Some(&a),
+                validity_offset: 0,
             }),
             Nested::List(ListNested::<i32> {
                 is_optional: false,
                 offsets: &[0, 3, 7, 8, 8, 10],
                 validity: None,
+                validity_offset: 0,
             }),
             Nested::Primitive(None, false, 12),
         ];
@@ -306,11 +313,13 @@ mod tests {
                 is_optional: true,
                 offsets: &[0, 2, 2, 5],
                 validity: Some(&a),
+                validity_offset: 0,
             }),
             Nested::List(ListNested::<i32> {
                 is_optional: true,
                 offsets: &[0, 3, 7, 8, 8, 8],
                 validity: Some(&b),
+                validity_offset: 0,
             }),
             Nested::Primitive(None, false, 12),
         ];
@@ -330,16 +339,38 @@ mod tests {
                 is_optional: true,
                 offsets: &[0, 2, 2, 4],
                 validity: Some(&a),
+                validity_offset: 0,
             }),
             Nested::List(ListNested::<i32> {
                 is_optional: true,
                 offsets: &[0, 3, 7, 8, 8],
                 validity: Some(&b),
+                validity_offset: 0,
             }),
             Nested::Primitive(Some(&c), true, 12),
         ];
         let expected = vec![5, 5, 5, 5, 4, 5, 5, 0, 5, 2];
 
+        test(nested, expected)
+    }
+
+    #[test]
+    fn list_offset() {
+        let a = Bitmap::from([
+            true, false, false, false, true, false, true, false, false, false, true, false, false,
+            false, false,
+        ]);
+        let nested = vec![
+            Nested::List(ListNested {
+                is_optional: true,
+                offsets: &[4, 4, 7, 7],
+                validity: Some(&validity),
+                validity_offset: 3,
+            }),
+            Nested::Primitive(None, false, 12),
+        ];
+
+        let expected = vec![0, 2, 2, 2, 0];
         test(nested, expected)
     }
 }

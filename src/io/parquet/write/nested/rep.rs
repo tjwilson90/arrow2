@@ -181,6 +181,7 @@ mod tests {
                 is_optional: false,
                 offsets: &[0, 2, 2, 5, 8, 8, 11, 11, 12],
                 validity: None,
+                validity_offset: 0,
             }),
             Nested::Primitive(None, false, 12),
         ];
@@ -197,11 +198,13 @@ mod tests {
                 is_optional: false,
                 offsets: &[0, 2, 2, 4],
                 validity: None,
+                validity_offset: 0,
             }),
             Nested::List(ListNested::<i32> {
                 is_optional: false,
                 offsets: &[0, 3, 7, 8, 10],
                 validity: None,
+                validity_offset: 0,
             }),
             Nested::Primitive(None, false, 10),
         ];
@@ -222,6 +225,7 @@ mod tests {
                 is_optional: true,
                 offsets: &[0i32, 1, 2],
                 validity: None,
+                validity_offset: 0,
             }),
             Nested::Struct(None, true, 2),
             Nested::Primitive(None, true, 2),
