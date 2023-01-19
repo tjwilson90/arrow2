@@ -4,8 +4,10 @@ use std::fmt::Debug;
 
 use crate::array::{ListArray, StructArray};
 use crate::bitmap::Bitmap;
-use crate::datatypes::PhysicalType;
+use crate::compute::aggregate::estimated_bytes_size;
+use crate::datatypes::{DataType, PhysicalType};
 use crate::io::parquet::read::schema::is_nullable;
+use crate::io::parquet::write::array_to_page;
 use crate::offset::Offset;
 use crate::{
     array::Array,
@@ -149,6 +151,7 @@ fn to_nested_recursive<'a>(
     Ok(())
 }
 
+/// Return the primitive arrays backing this array.
 pub fn to_leaves(array: &dyn Array) -> Vec<&dyn Array> {
     let mut leaves = vec![];
     to_leaves_recursive(array, &mut leaves);
@@ -194,6 +197,53 @@ fn to_parquet_leaves_recursive(type_: ParquetType, leaves: &mut Vec<ParquetPrimi
                 .for_each(|type_| to_parquet_leaves_recursive(type_, leaves));
         }
     }
+}
+
+/// Returns a vector of iterators of [`Page`], one per leaf column in the array
+pub fn hermes_array_to_columns<A: AsRef<dyn Array> + Send + Sync>(
+    array: A,
+    type_: ParquetType,
+    options: WriteOptions,
+    encoding: &[Encoding],
+) -> Result<Vec<DynIter<'static, Result<Page>>>> {
+    let array = array.as_ref();
+    if !matches!(array.data_type(), DataType::List(_)) {
+        return array_to_columns(array, type_, options, encoding);
+    }
+    let mut all_pages = (0..encoding.len()).map(|_| vec![]).collect::<Vec<_>>();
+    let types = to_parquet_leaves(type_.clone());
+    let array_byte_size = estimated_bytes_size(array);
+    let page_size = options.data_pagesize_limit.unwrap_or(1024 * 1024);
+    let bytes_per_row = ((array_byte_size as f64) / ((array.len() + 1) as f64)) as usize;
+    let rows_per_page = (page_size / (bytes_per_row + 1)).max(1);
+    for offset in (0..array.len()).step_by(rows_per_page) {
+        let length = rows_per_page.min(array.len() - offset);
+        let array = array.slice(offset, length);
+        let array = array.as_ref();
+        let nested = to_nested(array, &type_)?;
+        let values = to_leaves(array);
+
+        for ((((values, nested), type_), encoding), pages) in values
+            .into_iter()
+            .zip(nested.into_iter())
+            .zip(types.iter())
+            .zip(encoding.iter())
+            .zip(all_pages.iter_mut())
+        {
+            pages.push(array_to_page(
+                values,
+                type_.clone(),
+                &nested,
+                options,
+                *encoding,
+            ));
+        }
+    }
+
+    Ok(all_pages
+        .into_iter()
+        .map(|pages| DynIter::new(pages.into_iter()))
+        .collect())
 }
 
 /// Returns a vector of iterators of [`Page`], one per leaf column in the array

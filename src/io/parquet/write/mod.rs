@@ -67,6 +67,7 @@ pub use schema::to_parquet_type;
 pub use sink::FileSink;
 
 pub use pages::array_to_columns;
+pub use pages::hermes_array_to_columns;
 pub use pages::to_leaves;
 pub use pages::Nested;
 
