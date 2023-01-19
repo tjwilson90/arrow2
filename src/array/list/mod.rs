@@ -132,16 +132,26 @@ impl<O: Offset> ListArray<O> {
     /// # Safety
     /// The caller must ensure that `offset + length < self.len()`.
     pub unsafe fn slice_unchecked(&self, offset: usize, length: usize) -> Self {
+        let start = self.offsets.start_end_unchecked(offset).0;
+        let end = self.offsets.start_end_unchecked(offset + length).0;
         let validity = self
             .validity
             .clone()
             .map(|bitmap| bitmap.slice_unchecked(offset, length))
             .and_then(|bitmap| (bitmap.unset_bits() > 0).then(|| bitmap));
-        let offsets = self.offsets.clone().slice_unchecked(offset, length + 1);
+        let offsets = self
+            .offsets
+            .clone()
+            .slice_unchecked(offset, length + 1)
+            .into_inner()
+            .into_iter()
+            .map(|v| v - O::from_as_usize(start))
+            .collect();
+        let values = self.values.slice_unchecked(start, end - start);
         Self {
             data_type: self.data_type.clone(),
-            offsets,
-            values: self.values.clone(),
+            offsets: OffsetsBuffer::new_unchecked(offsets),
+            values,
             validity,
         }
     }
