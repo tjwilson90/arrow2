@@ -108,15 +108,56 @@ pub(crate) fn build_statistics<O: Offset>(
         max_value: array
             .iter()
             .flatten()
-            .map(|x| x.as_bytes())
-            .max_by(|x, y| ord_binary(x, y))
-            .map(|x| x.to_vec()),
+            .map(|x| truncate_up(x))
+            .max_by(|x, y| ord_binary(x.as_bytes(), y.as_bytes()))
+            .map(|x| x.into_bytes()),
         min_value: array
             .iter()
             .flatten()
-            .map(|x| x.as_bytes())
-            .min_by(|x, y| ord_binary(x, y))
-            .map(|x| x.to_vec()),
+            .map(|x| truncate_down(x))
+            .min_by(|x, y| ord_binary(x.as_bytes(), y.as_bytes()))
+            .map(|x| x.into_bytes()),
     } as &dyn Statistics;
     serialize_statistics(statistics)
+}
+
+const MAX_STAT_LENGTH: usize = 256;
+
+/// Truncate a string down to the given `MAX_STAT_LENGTH`; breaks
+/// at a proper character boundary before the limit.
+pub fn truncate_down(s: &str) -> String {
+    if s.len() <= MAX_STAT_LENGTH {
+        return s.to_string();
+    }
+    for index in (0..=MAX_STAT_LENGTH).rev() {
+        if s.is_char_boundary(index) {
+            return s[..index].to_string();
+        }
+    }
+    unreachable!();
+}
+
+/// Truncate a string "up", such that it has length at most `MAX_STAT_LENGTH`
+/// but is lexicographically greater than the given string. Mainly useful
+/// for computing useful min/max statistics.
+pub fn truncate_up(s: &str) -> String {
+    if s.len() <= MAX_STAT_LENGTH {
+        return s.to_string();
+    }
+    for index in (0..=MAX_STAT_LENGTH).rev() {
+        if s.is_char_boundary(index) {
+            let mut trunc = s[..index].to_string();
+            let ch = trunc.pop().unwrap();
+            trunc.push(match ch {
+                '\0'..='\u{D7FE}' | '\u{E000}'..='\u{10FFFE}' => {
+                    char::from_u32(ch as u32 + 1).unwrap()
+                }
+                '\u{D7FF}' => '\u{E000}',
+                // technically wrong (not a proper rounding up) but good enough
+                _ => '\u{10FFFF}',
+            });
+            return trunc;
+        }
+    }
+    unreachable!();
 }

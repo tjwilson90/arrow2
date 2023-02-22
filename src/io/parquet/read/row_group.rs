@@ -203,6 +203,7 @@ pub fn to_deserializer<'a>(
             .zip(pages.into_iter())
             .map(|((column_meta, chunk), mut pages)| {
                 // de-offset the start, since we read in chunks (and offset is from start of file)
+                let len = chunk.len();
                 let mut meta: PageMetaData = column_meta.into();
                 pages
                     .iter_mut()
@@ -214,6 +215,7 @@ pub fn to_deserializer<'a>(
                     pages,
                     vec![],
                     vec![],
+                    len * 2 + 1024,
                 );
                 let pages = Box::new(pages) as Pages;
                 (
