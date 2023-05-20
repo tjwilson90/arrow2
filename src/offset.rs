@@ -282,10 +282,10 @@ impl<O: Offset> Offsets<O> {
             return Ok(());
         }
         let other = &other.0[start..start + length + 1];
-        let other_length = other.last().expect("Length to be non-zero");
+        let other_length = *other.last().expect("Length to be non-zero") - other[0];
         let mut length = *self.last();
         // check if the operation would overflow
-        length.checked_add(other_length).ok_or(Error::Overflow)?;
+        length.checked_add(&other_length).ok_or(Error::Overflow)?;
 
         let lengths = other.windows(2).map(|w| w[1] - w[0]);
         let offsets = lengths.map(|new_length| {
